@@ -1,8 +1,10 @@
 ##
-# A tag register is used to track class to tag associations.
+# The tag register is used to track class to tag associations.
 #
 class YAML::Tag::Register
 
+  # Sigh, Crytal won't let us use `Class` as an argument type.
+  # So we are using a Proc that contains the class for now.
   @tags : Hash(String, ->)
 
   def initialize
@@ -24,7 +26,9 @@ class YAML::Tag::Register
   end
 
   #
+  # Is a given tag defined?
   #
+  # TODO: Can a tag actually ever be nil (from LibYAML)?
   #
   def tag?(tag : String?)
     tag ? false : @tags.has_key?(tag)
@@ -36,7 +40,7 @@ class YAML::Tag::Register
   def tags_for(key : Class)
     list = Array(String)
     @tags.each do |tag, tag_class|
-      list << tag if tag_class == key
+      list << tag if tag_class.call == key
     end
     list
   end

@@ -1,4 +1,4 @@
-# YAML::Serializer takes intermediate representation and converts it to native
+# YAML Serializer takes intermediate representation and converts it to native
 # data structures.
 #
 class YAML::Serializer
