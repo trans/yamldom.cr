@@ -1,9 +1,15 @@
 # YAML Intermediate Representation
 
+[![YAML Process](yamlproc.png)](http://yaml.org/spec/1.2/spec.html#Processing)
+
 The YAML Representation library provides a YAML composer that preserves
-information lossed when using the current parser. This it is an intermediate
-represention at a stage of parsing just prior to a final native representation. 
-In particular `tag` information is preserved and accessable.
+information lossed when using the current Crystal "parser". This it is an
+intermediate represention at a stage of loading just prior to a final
+native construction. In particular `tag` information is preserved and
+accessable.
+
+In addition this library provides actual native constuction*, which the current
+Crystal library does not yet provide. (*Not yet working)
 
 
 ## Installation
