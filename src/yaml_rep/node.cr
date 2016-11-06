@@ -1,19 +1,19 @@
 module YAML
 
-	##
-	#
-	abstract class Node
-		@tag : String
+  ##
+  #
+  abstract class Node
+    @tag : String
 
-		getter tag
+    getter tag
 
     def initialize
       @tag = ""
     end
 
-		def tag=(tag : String)
-		  @tag = tag
-		end
-	end
+    def tag=(tag : String)
+      @tag = tag
+    end
+  end
 
 end

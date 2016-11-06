@@ -1,21 +1,21 @@
 module YAML
 
-	##
-	#
-	class Scalar < Node
+  ##
+  #
+  class Scalar < Node
     @tag : String
-		@value : String?
+    @value : String?
 
-		getter value
+    getter value
 
-		def initialize(tag : String, value : String?)
-		  @tag = tag
-		  @value = value 
-		end
+    def initialize(tag : String, value : String?)
+      @tag = tag
+      @value = value 
+    end
 
-		def value=(value : String?)
-		  @value = value
-		end
+    def value=(value : String?)
+      @value = value
+    end
 
     def to_s
       @value.to_s
@@ -24,6 +24,6 @@ module YAML
     def to(string_class : String.class)
       string_class.new(@value)
     end
-	end
+  end
 
 end

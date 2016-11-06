@@ -28,7 +28,6 @@ module YAML
       @node.size
     end
 
-
   end
 
 end
