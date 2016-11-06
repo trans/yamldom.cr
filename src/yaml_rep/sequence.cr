@@ -1,4 +1,4 @@
-module YAML::Representation
+module YAML
 
 	##
 	#
@@ -9,7 +9,7 @@ module YAML::Representation
 
 		getter value
 
-		def initialize(tag : String?)
+		def initialize(tag : String)
 		  @tag = tag
 		  @value = Array(Node).new 
 		end
@@ -18,15 +18,16 @@ module YAML::Representation
 		  @value << node
 		end
 
+		def size
+		  @value.size
+		end
+
 		def each
 		  @value.each do |v|
 		    yield v
 		  end
 		end
 
-		def size
-		  @value.size
-		end
 	end
 
 end

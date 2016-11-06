@@ -1,3 +1,3 @@
-module YAML::Representation
-  VERSION = "0.1.0"
+module YAML
+  IR_VERSION = "0.1.0"
 end

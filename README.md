@@ -13,7 +13,7 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   yaml_rep:
-    github: trans/yaml_rep
+    github: trans/yaml_rep.cr
 ```
 
 
@@ -35,8 +35,8 @@ document.tag  #=> "!foo"
 
 ## Development
 
-If you'd like to help this project improve, familiarize yourself witht the YAML sepcification
-and have at it.
+If you'd like to help this project improve, familiarize yourself witht the
+[YAML sepcification](http://yaml.org/spec/1.2/spec.html) and have at it.
 
 
 ## Contributing

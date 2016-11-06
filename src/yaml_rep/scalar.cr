@@ -1,13 +1,14 @@
-module YAML::Representation
+module YAML
 
 	##
 	#
 	class Scalar < Node
+    @tag : String
 		@value : String?
 
 		getter value
 
-		def initialize(tag : String?, value : String?)
+		def initialize(tag : String, value : String?)
 		  @tag = tag
 		  @value = value 
 		end

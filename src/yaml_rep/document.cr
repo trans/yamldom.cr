@@ -1,5 +1,8 @@
-module YAML::Representation
+module YAML
 
+  ##
+  # YAML Document
+  #
   class Document
     include Enumerable(Node)
 
@@ -24,6 +27,8 @@ module YAML::Representation
     def size
       @node.size
     end
+
+
   end
 
 end

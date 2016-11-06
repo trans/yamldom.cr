@@ -1,13 +1,17 @@
-module YAML::Representation
+module YAML
 
 	##
 	#
-	class Node
-		@tag : String?
+	abstract class Node
+		@tag : String
 
 		getter tag
 
-		def tag=(tag : String?)
+    def initialize
+      @tag = ""
+    end
+
+		def tag=(tag : String)
 		  @tag = tag
 		end
 	end

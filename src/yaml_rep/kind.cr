@@ -1,4 +1,4 @@
-module YAML::Representation
+module YAML
 
   ##
   #
