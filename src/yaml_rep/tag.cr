@@ -17,50 +17,50 @@ class YAML::Tag
     # TODO
   end
 
-  #
-  # Global tag register is the default register used when serializing.
-  #
-  @@register : Register = Register.new
+#  #
+#  # Global tag register is the default register used when serializing.
+#  #
+#  @@register : Register = Register.new
 
-  #
-  #
-  #
-  def self.register
-    @@register
-  end
+#  #
+#  #
+#  #
+#  def self.register
+#    @@register
+#  end
 
-  # 
-  # Returns class associated with given tag.
-  #
-  def self.[](tag : String)
-    @@register[tag]
-  end
+#  # 
+#  # Returns class associated with given tag.
+#  #
+#  def self.[](tag : String)
+#    @@register[tag]
+#  end
 
-  # 
-  # Returns an array of tags associated with a class.
-  #
-  def self.[](tag_class : Class)
-    @@register[tag_class]
-  end
+#  # 
+#  # Returns an array of tags associated with a class.
+#  #
+#  def self.[](tag_class : Class)
+#    @@register[tag_class]
+#  end
 
-  #
-  #
-  #
-  def self.[]=(tag : String, tag_class : Class)
-    @@register[tag] = tag_class
-  end
+#  #
+#  #
+#  #
+#  def self.[]=(tag : String, tag_class : Class)
+#    @@register[tag] = tag_class
+#  end
 
-  Tag["tag:yaml.org,2002:str"] = String
-  Tag["tag:yaml.org,2002:seq"] = Array
-  Tag["tag:yaml.org,2002:map"] = Hash
+#  Tag["tag:yaml.org,2002:str"] = String
+#  Tag["tag:yaml.org,2002:seq"] = Array
+#  Tag["tag:yaml.org,2002:map"] = Hash
 
 end
 
-def Nil.yaml_serialize()
-  nil
-end
+#def Nil.yaml_serialize()
+#  nil
+#end
 
-def String.yaml_serialize(value : String)
-  value
-end
+#def String.yaml_serialize(value : String)
+#  value
+#end
 

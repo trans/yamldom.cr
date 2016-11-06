@@ -9,16 +9,16 @@ require "./yaml_rep/kind"
 require "./yaml_rep/document"
 #require "./yaml_rep/stream"
 require "./yaml_rep/tag"
-require "./yaml_rep/tag/register"
+require "./yaml_rep/recognizer"
+require "./yaml_rep/constructor"
 require "./yaml_rep/composer"
-require "./yaml_rep/serializer"
 
 module YAML
 
   def self.load(content : String | IO)
     root_node = compose(content)
-    serializer = Serializer.new
-    serializer.serialize(root_node)
+    constructor = Constructor.new
+    constructor.construct(root_node)
   end
 
   def self.compose(content : String | IO)
