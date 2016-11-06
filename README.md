@@ -2,14 +2,17 @@
 
 [![YAML Process](yamlproc.png)](http://yaml.org/spec/1.2/spec.html#Processing)
 
-The YAML Representation library provides a YAML composer that preserves
-information lossed when using the current Crystal "parser". This it is an
-intermediate represention at a stage of loading just prior to a final
-native construction. In particular `tag` information is preserved and
-accessable.
+The current Crystal YAML library produces a quasi-native/intermediate-representation.
+The result is native in that YAML Sequences are converted to Array, and YAML Mappings
+are converted to Hash, but it is still an intermediate representation because
+YAML Scalars remain just Strings.
 
-In addition this library provides actual native constuction*, which the current
-Crystal library does not yet provide. (*Not yet working)
+The YAML Representation library provides a true YAML composer that preserves
+information lost when using the current Crystal "parser". This it is an
+intermediate representation at a stage of loading just prior to a final
+native construction. In particular `tag` information is preserved and
+accessible. With this proper intermediate representation this library
+can also provide standard native construction.
 
 
 ## Installation
@@ -41,7 +44,7 @@ doc.tag  #=> "!foo"
 
 ## Development
 
-If you'd like to help this project improve, familiarize yourself witht the
+If you'd like to help this project improve, familiarize yourself with the
 [YAML sepcification](http://yaml.org/spec/1.2/spec.html) and have at it.
 
 
