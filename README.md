@@ -1,7 +1,7 @@
-# YAML::Representation
+# YAML Intermediate Representation
 
-The YAML Representation library provides an alternate YAML parser that preserves
-parser information lossed when using the normal parser. This it is an intermediate
+The YAML Representation library provides a YAML composer that preserves
+information lossed when using the current parser. This it is an intermediate
 represention at a stage of parsing just prior to a final native representation. 
 In particular `tag` information is preserved and accessable.
 
@@ -28,8 +28,8 @@ yaml = <<-YAML
 This is an example.
 YAML
 
-document = YAML::Representation.parse(yaml)
-document.tag  #=> "!foo"
+doc = YAML.compose(yaml)
+doc.tag  #=> "!foo"
 ```
 
 
