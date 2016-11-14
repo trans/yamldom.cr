@@ -79,7 +79,7 @@ class YAML::JSONSchema < YAML::TagSchema
   def construct(node : YAML::Scalar)
     case node.tag
     when "tag:yaml.org,2002:str"
-      node.value
+      node.value.as(String)
     when "tag:yaml.org,2002:int"
       construct_integer(node)
     when "tag:yaml.org,2002:float"
@@ -96,9 +96,9 @@ class YAML::JSONSchema < YAML::TagSchema
   # Implicit conversions
   def construct_implicit(node : YAML::Scalar)
     case value = node.value
-    when /-? ( 0 | [1-9] [0-9]* )/
+    when /^[-]?(0|[1-9][0-9]*)$/
       value.to_i64
-    when /-? ( 0 | [1-9] [0-9]* ) ( \. [0-9]* )? ( [eE] [-+]? [0-9]+ )?/
+    when /^[-]?(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?$/
       value.to_f64
     when "true"
       true
@@ -107,8 +107,7 @@ class YAML::JSONSchema < YAML::TagSchema
     when "null"
       nil
     else
-      # TODO proper YAML error
-      raise "Invalid scalar"
+      raise YAML::Error.new("invalid scalar")
     end
   end
 
@@ -117,7 +116,7 @@ class YAML::JSONSchema < YAML::TagSchema
     when /-? ( 0 | [1-9] [0-9]* )/
       value.to_i64
     else
-      raise "invalid integer scalar"
+      raise YAML::Error.new("invalid integer scalar")
     end
   end
 
@@ -126,7 +125,7 @@ class YAML::JSONSchema < YAML::TagSchema
     when /-? ( 0 | [1-9] [0-9]* ) ( \. [0-9]* )? ( [eE] [-+]? [0-9]+ )?/
       value.to_f64
     else
-      raise "invalid float scalar"
+      raise YAML::Error.new("invalid float scalar")
     end
   end
 
@@ -137,7 +136,7 @@ class YAML::JSONSchema < YAML::TagSchema
     when "false"
       false
     else
-      raise "invalid boolean scalar"
+      raise YAML::Error.new("invalid boolean scalar")
     end
   end
 
@@ -192,19 +191,19 @@ class YAML::CoreSchema < YAML::TagSchema
   # Implicit conversions
   def construct_implicit(node : YAML::Scalar)
     case value = node.value
-    when /[-+]? [0-9]+/
+    when /^[-+]?[0-9]+$/
       value.to_i64
-    when /0o [0-7]+/          # Base 8
+    when /^0o[0-7]+$/        # Base 8
       value.to_i64(8)
-    when /0x [0-9a-fA-F]+/    # Base 16
+    when /^0x[0-9a-fA-F]+$/  # Base 16
       value.to_i64(16)
-    when /[-+]? ( \. [0-9]+ | [0-9]+ ( \. [0-9]* )? ) ( [eE] [-+]? [0-9]+ )?/
+    when /^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$/
       value.to_f64
-    when /[+]?\.inf/i
+    when /^[+]?\.inf$/i
       Float64::INFINITY
-    when /[-]\.inf/i
+    when /^[-]\.inf$/i
       -Float64::INFINITY
-    when /\.nan/i
+    when /^\.nan$/i
       Float64::NAN
     when /^true$/i
       true
@@ -219,29 +218,29 @@ class YAML::CoreSchema < YAML::TagSchema
 
   def construct_integer(node : YAML::Scalar)
     case value = node.value
-    when /[-+]? [0-9]+/
+    when /^[-+]?[0-9]+$/
       value.to_i64
-    when /0o [0-7]+/          # Base 8
+    when /^0o[0-7]+$/          # Base 8
       value.to_i64(8)
-    when /0x [0-9a-fA-F]+/    # Base 16
+    when /^0x[0-9a-fA-F]+$/    # Base 16
       value.to_i64(16)
     else
-      raise "invalid integer scalar"
+      raise YAML::Error.new("invalid integer scalar")
     end
   end
 
   def construct_float(node : YAML::Scalar)
     case value = node.value
-    when /[-+]? ( \. [0-9]+ | [0-9]+ ( \. [0-9]* )? ) ( [eE] [-+]? [0-9]+ )?/
+    when /^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$/
       value.to_f64
-    when /[+]?\.inf/i
+    when /^[+]?\.inf$/i
       Float64::INFINITY
-    when /[-]\.inf/i
+    when /^[-]\.inf$/i
       -Float64::INFINITY
-    when /\.nan/i
+    when /^\.nan$/i
       Float64::NAN
     else
-      raise "invalid float scalar"
+      raise YAML::Error.new("invalid float scalar")
     end
   end
 
@@ -252,7 +251,7 @@ class YAML::CoreSchema < YAML::TagSchema
     when /^false$/i
       false
     else
-      raise "invalid boolean scalar"
+      raise YAML::Error.new("invalid boolean scalar")
     end
   end
 
@@ -287,18 +286,26 @@ end
 # Config stream limits mapping keys to strings/symbols.
 class YAML::ConfigSchema < YAML::CoreSchema
 
-  alias KeyType = String | Symbol
+  #alias KeyType = String | Symbol
 
-  alias ValueType = Nil | Bool | Int64 | Float64 | String | Array(ValueType) | Hash(KeyType, ValueType)
+  alias Type = Nil | Bool | Int64 | Float64 | String | Array(Type) | Hash(Type, Type)
 
   def as_type(value)
-    value.as(ValueType)
+    value.as(Type)
   end
 
   def construct(node : YAML::Mapping)
-    keys = node.map{ |k,v| construct(k).as(KeyType) }
+    keys = node.map{ |k,v| construct_key(k) }
     vals = node.map{ |k,v| as_type(construct(v)) }
     Hash.zip(keys, vals)
+  end
+
+  def construct_key(node : YAML::Node)
+    raise YAML::Error.new("bad configuration key, must be string")
+  end
+
+  def construct_key(node : YAML::Scalar)
+    node.value
   end
 
 end
