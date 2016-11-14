@@ -28,17 +28,86 @@ dependencies:
 
 ## Usage
 
+First, lets see how we can get the intermediate representation of a YAML document.
 
 ```crystal
 require "yaml_rep"
 
 yaml = <<-YAML
 --- !foo
-This is an example.
+- EXAMPLE
+- 100
 YAML
 
 doc = YAML.compose(yaml)
-doc.tag  #=> "!foo"
+doc.tag    #=> "!foo"
+doc.value  #=> ["EXAMPLE", "100"]
+doc.class  #=> YAML::Sequence
+```
+
+There are a few things to notice here. First we were able to get the tag.
+Second, the class of object compose retuirns a `YAML::Node` and there are
+three types of such nodes, `YAML::Scalar`, `YAML::Sequence` and `YAML::Mapping`.
+If we look at the elements inside the sequence we will see it is made up
+of other nodes.
+
+```
+doc.value[0]        #=> "EXAMPLE"
+doc.value[0].class  #=> YAML::Scalar
+```
+
+Lastly, note that the value 100 in the document is still stored internally as a String.
+It isn't an Integer because *composition* is a stage before *construction* -- in which
+node would be converted to native data types. But, that also means additional information
+such as the tag would be lost.
+
+```
+data = YAML.construct(doc)
+data  #=> ["EXAMPLE", 100]
+```
+
+Okay, so what's going on under hood? How does this all work. We use a called the
+*tag schema*. The base class is `YAML::TagSchema` and there are few subclasses that
+actually do the dirty work of figuring out how to construct YAML into data and deconstruct
+-- actually called representing -- data into YAML. The primary and thus default tag
+schema is `YAML::CoreSchema`. It encodes the full YAML 1.2 standard.
+
+Now here is the great thing about tag schemas. They allow us to control the tags of classes
+as we see fit including out own custom tags.
+
+```
+class MyTagSchema < YAML::CoreSchema
+  def construct(node : YAML::Scalar)
+    case node.tag
+    when "!foo"
+      Foo.new(node.value)
+    else
+      super(node)
+    end
+  end
+
+  def represent(value : Foo)
+    YAML::Scalar.new("!foo", value.to_s)
+  end
+end
+```
+
+Now ...
+
+```
+yaml = <<-YAML
+--- !foo
+Try Me
+YAML
+
+YAML.load(example, MyTagSchema.new)
+```
+
+Or a minor shortcut.
+
+```
+foo = MyTagSchema.load(example)
+foo.class #=> Foo
 ```
 
 
