@@ -1,6 +1,7 @@
 module YAML
 
   ##
+  # YAML Sequence.
   #
   class Sequence < Node
     include Enumerable(Node)

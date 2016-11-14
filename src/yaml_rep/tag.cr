@@ -20,7 +20,7 @@ class YAML::Tag
 #  #
 #  # Global tag register is the default register used when serializing.
 #  #
-#  @@register : Register = Register.new
+#  @@register : Hash(String, Tuple(String, Class)Register = Register.new
 
 #  #
 #  #

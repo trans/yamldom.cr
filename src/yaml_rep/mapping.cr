@@ -1,6 +1,7 @@
 module YAML
 
   ##
+  # YAML Mapping.
   #
   class Mapping < Node
     include Enumerable({Node, Node})

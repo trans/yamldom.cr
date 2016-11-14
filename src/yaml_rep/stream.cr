@@ -1,35 +1,47 @@
-module YAML
+class YAML::Stream
 
-  ##
-  # YAML Stream
-  #
-  class Stream
-    include Enumerable(Document)
-
-		@documents : Array(Document)
-
-    def initialize(documents : Array(Document))
-      @documents = documents
-    end
-
-    def each(&block)
-      @documents.each(&block)
-    end
-
-    def size
-      @documents.size
-    end
-
-    def self.load(content : String | IO)
-      Composer
-      Stream.new( )
-    end
-
-    def self.load(content : IO)
-
-      Stream.new( )
-    end
-
+  def initialize(tag_schema : TagSchema)
+    @tag_schema = tag_schema
   end
 
+  def load(source : String | IO)
+    construct(compose(source))
+  end
+
+  def dump(value, io : IO)
+    serialize(represent(value))
+  end
+
+  def dump(value)
+    serialize(represent(value))
+  end
+
+  def construct(node : Node)
+    @tag_schema.construct(node)
+  end
+
+  def represent(value) : Node
+    @tag_schema.represent(value)
+  end
+
+  def compose(source : String | IO)
+    Composer.new(source) do |composer|
+      composer.compose #(source)
+    end
+  end
+
+  def serialize(node : Node)
+    serializer.serialize(node)
+  end
+
+  def serialize(node : Node, io : IO)
+    serializer.serialize(node, io)
+  end
+
+  #def composer
+  #  @composer ||= Composer.new
+  #end
+
 end
+
+

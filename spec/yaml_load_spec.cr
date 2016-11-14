@@ -4,7 +4,7 @@ describe YAML::Composer do
 
   it "serializes string scalar" do
     example = <<-YAML
-    --- !foo
+    ---
     Hello String
     ...
     YAML

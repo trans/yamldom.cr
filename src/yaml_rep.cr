@@ -5,30 +5,43 @@ require "./yaml_rep/node"
 require "./yaml_rep/scalar"
 require "./yaml_rep/sequence"
 require "./yaml_rep/mapping"
-require "./yaml_rep/kind"
-require "./yaml_rep/document"
-#require "./yaml_rep/stream"
-require "./yaml_rep/tag"
-require "./yaml_rep/recognizer"
-require "./yaml_rep/constructor"
+#require "./yaml_rep/kind"
+#require "./yaml_rep/tag"
 require "./yaml_rep/composer"
+require "./yaml_rep/serializer"
+require "./yaml_rep/tag_schema"
+require "./yaml_rep/stream"
 
 module YAML
 
-  def self.load(content : String | IO)
-    root_node = compose(content)
-    constructor = Constructor.new
-    constructor.construct(root_node)
+  # TODO: cache stream by schema 
+
+  def self.load(content : (String | IO), tag_schema : TagSchema = CoreSchema.new)
+    stream = Stream.new(tag_schema)
+    stream.load(content)
   end
 
-  def self.compose(content : String | IO)
-    composer = Composer.new(content)
-    composer.compose
+  def self.load_stream(content : (String | IO), tag_schema : TagSchema = CoreSchema.new)
+    stream = Stream.new(tag_schema)
+    stream.load_stream(content)
+
+    #roots = compose_stream(content)
+    #roots.map{ |root| constructor.construct(root) }
   end
 
-  def self.compose_all(content : String | IO)
-    composer = Composer.new(content)
-    composer.compose_all
+  def self.compose(content : (String | IO), tag_schema : TagSchema = CoreSchema.new)
+    stream = Stream.new(tag_schema)
+    stream.compose(content)
+    #composer = Composer.new(content)
+    #composer.compose
+  end
+
+  def self.compose_stream(content : (String | IO), tag_schema : TagSchema = CoreSchema.new)
+    stream = Stream.new(tag_schema)
+    stream.compose_stream(content)
+
+    #composer = Composer.new(content)
+    #composer.compose_stream
   end
 
 end
