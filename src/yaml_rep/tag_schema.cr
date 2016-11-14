@@ -13,9 +13,9 @@ abstract class YAML::TagSchema
   #  constructor.construct(compose(content))
   #end
 
-  def load(content : String | IO)
-    compose(content).map{ |root| construct(root) }
-  end
+  #def load(content : String | IO)
+  #  compose(content).map{ |root| construct(root) }
+  #end
 
   #
   def construct(node : YAML::Null)
