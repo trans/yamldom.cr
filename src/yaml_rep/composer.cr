@@ -43,7 +43,7 @@ class YAML::Composer
     value = (
       case @pull_parser.read_next
       when EventKind::STREAM_END
-        YAML::Null.new(tag)  #nil
+        YAML::Scalar.new(nil)
       when EventKind::DOCUMENT_START
         compose_document
       else
@@ -59,8 +59,7 @@ class YAML::Composer
     unless @pull_parser.read_next == EventKind::DOCUMENT_END
       raise "Expected DOCUMENT_END"
     end
-    # TODO: Should we bother with document?
-    value #Document.new(value)
+    value
   end
 
   def compose_node
@@ -79,7 +78,12 @@ class YAML::Composer
   end
 
   def compose_scalar
-    Scalar.new(tag, @pull_parser.value)
+    value = @pull_parser.value
+    if tag == "" && @pull_parser.value == ""
+      YAML::Scalar.new(nil)
+    else
+      YAML::Scalar.new(@pull_parser.value, tag)
+    end
   end
 
   def compose_sequence

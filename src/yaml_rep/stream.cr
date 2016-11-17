@@ -9,11 +9,13 @@ class YAML::Stream
   end
 
   def dump(value, io : IO)
-    serialize(represent(value))
+    #serialize(represent(value), io)
+    serialize(value, io)
   end
 
   def dump(value)
-    serialize(represent(value))
+    #serialize(represent(value))
+    serialize(value)
   end
 
   def construct(node : Node)
@@ -36,6 +38,18 @@ class YAML::Stream
 
   def serialize(node : Node, io : IO)
     serializer.serialize(node, io)
+  end
+
+  def serialize(object)
+    serializer.serialize(object)
+  end
+
+  def serialize(object, io : IO)
+    serializer.serialize(object, io)
+  end
+
+  def serializer
+    @serializer ||= Serializer.new(@tag_schema)
   end
 
   #def composer

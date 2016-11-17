@@ -1,12 +1,11 @@
 require "./spec_helper"
 
-describe YAML::Composer do
+describe YAML do
 
   it "load string" do
     example = <<-YAML
     ---
     Hello String
-    ...
     YAML
 
     doc = YAML.load(example)
@@ -53,6 +52,18 @@ describe YAML::Composer do
     doc.should eq(nil)
   end
 
+  it "load null from empty document" do
+    example = <<-YAML
+    ---
+    ...
+    YAML
+
+    doc = YAML.load(example)
+
+    doc.class.should eq(Nil)
+    doc.should eq(nil)
+  end
+
   it "load sequence" do
     example = <<-YAML
     ---
@@ -77,8 +88,25 @@ describe YAML::Composer do
 
     doc = YAML.load(example)
 
-    doc.class.should eq(Hash(String, String))
     doc.should eq({"foo" => "oof", "bar" => "rab"})
+    doc.class.should eq(Hash(String, String))
+  end
+
+  it "handles a complex case" do
+    example = <<-YAML
+    ---
+    x:
+    - [1, 2, 3]
+    - {a: b, c: d}
+    y:
+      string taht is on 
+      multiple lines
+    z:
+    - 1
+    - "2"
+    - true
+    ...
+    YAML
   end
 
 end
