@@ -36,6 +36,15 @@ class YAML::Sequence < YAML::Collection
     end
   end
 
+  # TODO: tag should also be equal but also `"" == "tag:yaml.org,2002:seq"`
+  def ==(other : Sequence)
+    value == other.value #&& tag == other.tag
+  end
+
+  def ==(other)
+    false
+  end
+
   def to_yaml(emitter : YAML::Emitter)
     emitter.sequence(@tag) do
       each &.to_yaml(emitter)

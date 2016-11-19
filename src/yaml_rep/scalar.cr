@@ -23,6 +23,15 @@ class YAML::Scalar < YAML::Node
     @value
   end
 
+  # TODO: tag should also be equal but also `"" == "tag:yaml.org,2002:str"`
+  def ==(other : Scalar)
+    value == other.value #&& tag == other.tag
+  end
+
+  def ==(other)
+    false
+  end
+
   def map
     yield self
   end
