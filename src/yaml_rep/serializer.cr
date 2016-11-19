@@ -1,177 +1,157 @@
-# TODO: Don't think we need separate Emitter class, it's code can be incorporated into Serializer.
+require "yaml/lib_yaml"
+
+module YAML
+  #module Tags
+  #  STR   = "tag:yaml.org,2002:str"
+  #  SEQ   = "tag:yaml.org,2002:seq"
+  #  MAP   = "tag:yaml.org,2002:map"
+  #  NULL  = "tag:yaml.org,2002:null"
+  #  INT   = "tag:yaml.org,2002:int"
+  #  BOOL  = "tag:yaml.org,2002:bool"
+  #  FLOAT = "tag:yaml.org,2002:float"
+  #
+  #  #IMPLICIT = {SEQ, MAP, STR, NULL, BOOL, INT, FLOAT}
+  #end
+end
 
 # Serializer converts intermediate representation into a serialization of events.
 # This class interfaces with LibYAML which takes care of the final leg of createing a
 # character stream to produce the final YAML document.
 #
 class YAML::Serializer
+  protected getter io
 
-  def initialize(tag_schema : TagSchema = DEFAULT_SCHEMA)
-    @tag_schema = tag_schema
+  def initialize(@io : IO)
+    @serializer = Pointer(Void).malloc(LibYAML::EMITTER_SIZE).as(LibYAML::Emitter*)
+    @event = LibYAML::Event.new
+    @closed = false
+    LibYAML.yaml_emitter_initialize(@serializer)
+    LibYAML.yaml_emitter_set_output(@serializer, ->(data, buffer, size) {
+      serializer = data.as(YAML::Serializer)
+      serializer.io.write(Slice.new(buffer, size))
+      1
+    }, self.as(Void*))
   end
 
-  # Serialize intermediate representation.
+  def self.new(io : IO)
+    serializer = new(io)
+    yield serializer ensure serializer.close
+  end
 
-  # Serialize single document returning a String.
-  def serialize(node : Node)
-    String.build do |str_io|
-      serialize(node, str_io)
+  def stream_start
+    emit stream_start, LibYAML::Encoding::UTF8
+  end
+
+  def stream_end
+    emit stream_end
+  end
+
+  def stream
+    stream_start
+    yield
+    stream_end
+  end
+
+  def document_start
+    emit document_start, nil, nil, nil, 0
+  end
+
+  def document_end
+    emit document_end, 1
+  end
+
+  def document
+    document_start
+    yield
+    document_end
+  end
+
+  def scalar(string, tag : String? = nil, style : LibYAML::ScalarStyle = LibYAML::ScalarStyle::ANY)
+    #emit scalar, nil, tag, string, string.bytesize, implicit, implicit, LibYAML::ScalarStyle::ANY
+    implicit = tag ? (implicit?(tag) ? 1 : 0) : 1
+    # Union type `(String | Nil)` of `tag` causes an error. This bit of ugly code works around that.
+    utag = tag.try(&.to_unsafe) || Pointer(UInt8).null
+    LibYAML.yaml_scalar_event_initialize(
+      pointerof(@event), nil, utag, string, string.bytesize, implicit, implicit, style
+    )
+    yaml_emit("scalar")
+  end
+
+  def <<(value)
+    scalar value.to_s
+  end
+
+  def sequence_start(tag : String? = nil, style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
+    #emit sequence_start, nil, tag, 0, LibYAML::SequenceStyle::ANY
+    implicit = tag ? (implicit?(tag) ? 1 : 0) : 1
+    utag = tag.try(&.to_unsafe) || Pointer(UInt8).null
+    LibYAML.yaml_sequence_start_event_initialize(pointerof(@event), nil, utag, implicit, style)
+    yaml_emit("sequence_start")
+  end
+
+  def sequence_end
+    emit sequence_end
+  end
+
+  def sequence(tag : String? = nil, style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
+    sequence_start(tag, style)
+    yield
+    sequence_end
+  end
+
+  def mapping_start(tag : String? = nil, style : LibYAML::MappingStyle = LibYAML::MappingStyle::ANY)
+    #emit mapping_start, nil, tag, 0, style
+    implicit = tag ? (implicit?(tag) ? 1 : 0) : 1
+    utag = tag.try(&.to_unsafe) || Pointer(UInt8).null
+    LibYAML.yaml_mapping_start_event_initialize(pointerof(@event), nil, utag, implicit, style)
+    yaml_emit("mapping_start")
+  end
+
+  def mapping_end
+    emit mapping_end
+  end
+
+  def mapping(tag : String? = nil, style : LibYAML::MappingStyle = LibYAML::MappingStyle::ANY)
+    mapping_start(tag, style)
+    yield
+    mapping_end
+  end
+
+  def flush
+    LibYAML.yaml_emitter_flush(@serializer)
+  end
+
+  def finalize
+    return if @closed
+    LibYAML.yaml_emitter_delete(@serializer)
+  end
+
+  def close
+    finalize
+    @closed = true
+  end
+
+  macro emit(event_name, *args)
+    LibYAML.yaml_{{event_name}}_event_initialize(pointerof(@event), {{*args}})
+    yaml_emit({{event_name.stringify}})
+  end
+
+  private def yaml_emit(event_name)
+    ret = LibYAML.yaml_emitter_emit(@serializer, pointerof(@event))
+    if ret != 1
+      raise YAML::Error.new("error emitting #{event_name}")
     end
   end
 
-  # Serialize single document dumping to IO.
-  def serialize(node : Node, io : IO)
-    YAML::Emitter.new(io) do |emitter|
-      emitter.stream do
-        emitter.document do
-          serialize_node(node, emitter)
-        end
-      end
+  # Determine if a tag can be implicit. All the core YAML types can be.
+  def implicit?(tag : String)
+    case tag
+    #when *IMPLICIT
+    when Tags::SEQ, Tags::MAP, Tags::STR, Tags::FLOAT, Tags::INT, Tags::NULL, Tags::BOOL
+      true
+    else
+      false
     end
-  end
-
-  # Serialize a stream returning a String.
-  def serialize(nodes : Array(Node))
-    String.build do |str_io|
-      serialize(nodes, str_io)
-    end
-  end
-
-  # Serialize a stream dumping to IO.
-  def serialize(nodes : Array(Node), io : IO)
-    YAML::Emitter.new(io) do |emitter|
-      emitter.stream do
-        nodes.each do |node|
-          emitter.document do
-            serialize_node(node, emitter)
-          end
-        end
-      end
-    end
-  end
-
-  def serialize(node : YAML::Scalar, emitter : YAML::Emitter)
-    emitter.scalar(node.value, node.tag)
-  end
-
-  def serialize(node : YAML::Sequence, emitter : Emitter)
-    emitter.sequence do
-      node.each do |n|
-        serialize(n, emitter) 
-      end
-    end
-  end
-
-  def serialize(node : YAML::Mapping, emitter : Emitter)
-    emitter.mapping do
-      node.each do |k, v|
-        serialize(k, emitter)
-        serialize(v, emitter)
-      end
-    end
-  end
-
-  # Direct serialization of native data types.
-
-  # Serialize object to a String.
-  def serialize(object)
-    String.build do |str_io|
-      serialize(object, str_io)
-    end
-  end
-
-  # Serialize object to IO.
-  def serialize(object, io : IO)
-    YAML::Emitter.new(io) do |emitter|
-      emitter.stream do
-        emitter.document do
-          serialize(object, emitter)
-        end
-      end
-    end
-  end
-
-  # Serialize Nil.
-  def serialize(nothing : Nil, emitter : YAML::Emitter)
-    emitter.scalar("")
-  end
-
-  # Serialize Bool.
-  def serialize(bool : Bool, emitter : YAML::Emitter)
-    emitter.scalar(bool)
-  end
-
-  # Serialize String.
-  def serialize(string : String, emitter : YAML::Emitter)
-    emitter.scalar(string)
-  end
-
-  # Serialize Symbol.
-  def serialize(symbol : Symbol, emitter : YAML::Emitter)
-    emitter.scalar(symbol)
-  end
-
-  # Serialize Number.
-  def serialize(number : Number, emitter : YAML::Emitter)
-    emitter.scalar(number.to_s)
-  end
-
-  # Serialize Array.
-  def serialize(array : Array, emitter : YAML::Emitter)
-    emitter.sequence do
-      array.each{ |e| serialize(e, emitter) }
-    end
-  end
-
-  # Serialize Hash.
-  def serialize(hash : Hash, emitter : YAML::Emitter)
-    emitter.mapping do
-      hash.each do |key, value|
-        serialize(key, emitter)
-        serialize(value, emitter)
-      end
-    end
-  end
-
-  # Serialize Tuple.
-  def serialize(tuple : Tuple, emitter : YAML::Emitter)
-    emitter.sequence do
-      tuple.each{ |e| serialize(e, emitter) }
-    end
-  end
-
-  # Serialize NamedTuple.
-  def serialize(named_tuple : NamedTuple, emitter : YAML::Emitter)
-    emitter.mapping do
-      named_tuple.each do |key, value|
-        serialize(key, emitter)
-        serialize(value, emitter)
-      end
-    end
-  end
-
-  # Serialize Set.
-  def serialize(set : Set, emitter : YAML::Emitter)
-    emitter.sequence do
-      set.each{ |e| serialize(e, emitter) }
-    end
-  end
-
-  # Serialize Enum.
-  def serialize(enumr : Enum, emitter : YAML::Emitter)
-    emitter.scalar(enumr.value)
-  end
-
-  # Serialize Time.
-  def serialize(time : Time, emitter : YAML::Emitter)
-    emitter.scalar(Time::Format::ISO_8601_DATE_TIME.format(time))
-  end
-
-  # Serialize any other object. This requires that the object have
-  # a `#to_canonical` method, which ultimately reduces to a native
-  # data type.
-  def serialize(object, emitter : YAML::Emitter)
-    serialize(object.to_canonical, emitter)
   end
 
 end

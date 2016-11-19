@@ -1,23 +1,16 @@
 require "yaml"
 
-require "./yaml_rep/core_ext"
-require "./yaml_rep/version"
 require "./yaml_rep/node"
 require "./yaml_rep/scalar"
+require "./yaml_rep/collection"
 require "./yaml_rep/sequence"
 require "./yaml_rep/mapping"
-#require "./yaml_rep/kind"
-#require "./yaml_rep/tag"
+require "./yaml_rep/pull_parser"
 require "./yaml_rep/composer"
-require "./yaml_rep/serializer"
-require "./yaml_rep/tag_schema"
-require "./yaml_rep/tag_schema/json_schema"
-require "./yaml_rep/tag_schema/core_schema"
-require "./yaml_rep/tag_schema/config_schema"
-#require "./yaml_rep/tag_schema/marshal_schema"
-require "./yaml_rep/stream"
+#require "./yaml_rep/serializer"
 
 module YAML
+  # TODO: Maybe these should be in LibYAML module?
   module Tags
     STR   = "tag:yaml.org,2002:str"
     SEQ   = "tag:yaml.org,2002:seq"
@@ -26,45 +19,35 @@ module YAML
     INT   = "tag:yaml.org,2002:int"
     BOOL  = "tag:yaml.org,2002:bool"
     FLOAT = "tag:yaml.org,2002:float"
-
     #IMPLICIT = {SEQ, MAP, STR, NULL, BOOL, INT, FLOAT}
   end
 
-  DEFAULT_SCHEMA = CoreSchema.new
-
-  # TODO: cache stream by schema ?
-
-  def self.load(content : (String | IO), tag_schema : TagSchema = DEFAULT_SCHEMA)
-    stream = Stream.new(tag_schema)
-    stream.load(content)
+  def self.compose(content : String | IO)
+    composer = Composer.new(content)
+    composer.compose
   end
 
-  def self.load_stream(content : (String | IO), tag_schema : TagSchema = DEFAULT_SCHEMA)
-    stream = Stream.new(tag_schema)
-    stream.load_stream(content)
-
-    #roots = compose_stream(content)
-    #roots.map{ |root| constructor.construct(root) }
+  def self.compose_stream(content : String | IO)
+    composer = Composer.new(content)
+    composer.compose_stream
   end
 
-  def self.compose(content : (String | IO), tag_schema : TagSchema = DEFAULT_SCHEMA)
-    stream = Stream.new(tag_schema)
-    stream.compose(content)
-    #composer = Composer.new(content)
-    #composer.compose
+  def self.dump_stream(docs : Array, io : IO)
+    String.builder do |str_io|
+      dump_stream(docs, str_io)
+    end
   end
 
-  def self.compose_stream(content : (String | IO), tag_schema : TagSchema = DEFAULT_SCHEMA)
-    stream = Stream.new(tag_schema)
-    stream.compose_stream(content)
-
-    #composer = Composer.new(content)
-    #composer.compose_stream
-  end
-
-  def self.dump(data, tag_schema : TagSchema = DEFAULT_SCHEMA)
-    stream = Stream.new(tag_schema)
-    stream.dump(data) 
+  def self.dump_stream(docs : Array, io : IO)
+    YAML::Emitter.new(io) do |emitter|
+      emitter.stream do
+        docs.each do |doc|
+          emitter.document do
+            doc.to_yaml(emitter)
+          end
+        end
+      end
+    end
   end
 
 end

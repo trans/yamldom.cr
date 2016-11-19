@@ -1,9 +1,14 @@
 # YAML Intermediate Representation Composer uses the pull parser
-# to convert serialization events into YAML nodes.
-#
+# to convert parser events into YAML nodes.
 class YAML::Composer
 
-  # TODO: pass parser around instead of using state, like emitter in serializer.
+  # TODO: Pass parser thru Node.new instead.
+  #   Technically it should be possible to compose nodes by passing the
+  #   pull parser thru `Node#new` methods, similar to how emitting works.
+  #   This would make the Composer class obsolete. To do this though would
+  #   also require passing an anchors cache around so anchored node can be
+  #   stored and resolved. Might also consider a YAML::Document class to
+  #   initiate the process, instead of relying on Node class itself for that.
 
   def initialize(content : String | IO)
     @pull_parser = YAML::PullParser.new(content)
@@ -79,15 +84,19 @@ class YAML::Composer
 
   def compose_scalar
     value = @pull_parser.value
-    if tag == "" && @pull_parser.value == ""
-      YAML::Scalar.new(nil)
+    if value
+      if scalar_tag == "" && @pull_parser.value == ""
+        YAML::Scalar.new(nil)
+      else
+        YAML::Scalar.new(value, scalar_tag, scalar_style)
+      end
     else
-      YAML::Scalar.new(@pull_parser.value, tag)
+      YAML::Scalar.new(nil)
     end
   end
 
   def compose_sequence
-    sequence = Sequence.new(tag)
+    sequence = Sequence.new(sequence_tag, sequence_style)
     anchor sequence, @pull_parser.sequence_anchor
 
     loop do
@@ -102,7 +111,7 @@ class YAML::Composer
   end
 
   def compose_mapping
-    mapping = Mapping.new(tag)
+    mapping = Mapping.new(mapping_tag, mapping_style)
     anchor mapping, @pull_parser.mapping_anchor
 
     loop do
@@ -130,8 +139,33 @@ class YAML::Composer
   end
 
   # TODO: Is tag ever nil? Should we allow it to be so?
-  private def tag
-    @pull_parser.tag || ""
+
+  private def scalar_tag
+    @pull_parser.scalar_tag || ""
+  end
+
+  private def sequence_tag
+    @pull_parser.sequence_tag || ""
+  end
+
+  private def mapping_tag
+    @pull_parser.mapping_tag || ""
+  end
+
+  #private def implicit
+  #  @pull_parser.implicit
+  #end
+
+  private def scalar_style
+    @pull_parser.scalar_style
+  end
+
+  private def sequence_style
+    @pull_parser.sequence_style
+  end
+
+  private def mapping_style
+    @pull_parser.mapping_style
   end
 
   private def unexpected_event

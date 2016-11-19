@@ -1,15 +1,12 @@
-##
-# The abstract Node class is the base class of the three kinds: Scalar,
-# Sequence and Mapping.
-#
+# The abstract Node class is the base class for the three kinds of YAML
+# nodes: `Scalar`, `Sequence` and `Mapping`.
 abstract class YAML::Node
-
   # TODO: Can tag be nil? Should we allow it to be nil?
-  @tag : String
+  @tag : String = ""
 
-  def initialize(tag : String = "")
-    @tag = tag
-  end
+  #def initialize(tag : String = "")
+  #  @tag = tag
+  #end
 
   # Canonical tag provided by LibYAML.
   getter tag
@@ -19,6 +16,10 @@ abstract class YAML::Node
   # TODO: Do we really need this?
   def tag=(tag : String)
     @tag = tag
+  end
+
+  def self.new(object : String)
+    Scalar.new(object)
   end
 
 end

@@ -74,8 +74,11 @@ describe YAML do
 
     doc = YAML.load(example)
 
-    doc.class.should eq(Array(String))
     doc.should eq(["foo", "bar"])
+
+    pending "if we can ever reduce the generic type" do
+      doc.class.should eq(Array(String))
+    end
   end
 
   it "load mapping" do
@@ -89,7 +92,10 @@ describe YAML do
     doc = YAML.load(example)
 
     doc.should eq({"foo" => "oof", "bar" => "rab"})
-    doc.class.should eq(Hash(String, String))
+
+    pending "if we can ever reduce the generic type" do
+      doc.class.should eq(Hash(String, String))
+    end
   end
 
   it "handles a complex case" do
