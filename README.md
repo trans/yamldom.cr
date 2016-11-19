@@ -61,6 +61,8 @@ It isn't an Integer because *composition* is a stage before *construction* -- in
 node would be converted to native data types. But, that also means additional information
 such as the tag would be lost.
 
+<!--
+
 ```
 data = YAML.construct(doc)
 data  #=> ["EXAMPLE", 100]
@@ -110,6 +112,7 @@ foo = MyTagSchema.load(example)
 foo.class #=> Foo
 ```
 
+-->
 
 ## Development
 
