@@ -32,7 +32,7 @@ module YAML
     composer.compose_stream
   end
 
-  def self.dump_stream(docs : Array, io : IO)
+  def self.dump_stream(docs : Array)
     String.builder do |str_io|
       dump_stream(docs, str_io)
     end
