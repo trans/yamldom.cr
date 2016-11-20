@@ -1,2 +1,2 @@
 require "spec"
-require "../src/yaml_rep"
+require "../src/yamldom"

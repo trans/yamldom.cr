@@ -41,7 +41,7 @@ describe YAML do
     root.tag.should eq("tag:clarkevans.com,2002:invoice")
     root.class.should eq(YAML::Mapping)
 
-    root["invoice"].should eq("34843")
+    root["invoice"].to_s.should eq("34843")
   end
 
 end

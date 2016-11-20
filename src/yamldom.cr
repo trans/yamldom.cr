@@ -1,13 +1,13 @@
 require "yaml"
 
-require "./yaml_rep/node"
-require "./yaml_rep/scalar"
-require "./yaml_rep/collection"
-require "./yaml_rep/sequence"
-require "./yaml_rep/mapping"
-require "./yaml_rep/pull_parser"
-require "./yaml_rep/composer"
-#require "./yaml_rep/serializer"
+require "./yamldom/node"
+require "./yamldom/scalar"
+require "./yamldom/collection"
+require "./yamldom/sequence"
+require "./yamldom/mapping"
+require "./yamldom/pull_parser"
+require "./yamldom/composer"
+#require "./yamldom/serializer"
 
 module YAML
   # TODO: Maybe these should be in LibYAML module?

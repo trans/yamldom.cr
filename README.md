@@ -1,18 +1,13 @@
-# YAML Intermediate Representation
+# YAML DOM
+
+## Intermediate Representation
 
 [![YAML Process](yamlproc.png)](http://yaml.org/spec/1.2/spec.html#Processing)
 
-The current Crystal YAML library produces a quasi-native/intermediate-representation.
-The result is native in that YAML Sequences are converted to Array, and YAML Mappings
-are converted to Hash, but it is still an intermediate representation because
-YAML Scalars remain just Strings.
-
-The YAML Representation library provides a true YAML composer that preserves
-information lost when using the current Crystal "parser". This it is an
-intermediate representation at a stage of loading just prior to a final
-native construction. In particular `tag` information is preserved and
-accessible. With this proper intermediate representation this library
-can also provide standard native construction.
+The YAML DOM library provides a YAML composer that the models YAML [Intermediate
+Representation](). This model preserves information lost when using the
+current Crystal "parser". In particular `tag` information is preserved
+and accessible.
 
 
 ## Installation
@@ -21,17 +16,16 @@ Add this to your application's `shard.yml`:
 
 ```yaml
 dependencies:
-  yaml_rep:
-    github: trans/yaml_rep.cr
+  yamldom:
+    github: trans/yamldom.cr
 ```
-
 
 ## Usage
 
 First, lets see how we can get the intermediate representation of a YAML document.
 
 ```crystal
-require "yaml_rep"
+require "yamldom"
 
 yaml = <<-YAML
 --- !foo
@@ -57,9 +51,9 @@ doc.value[0].class  #=> YAML::Scalar
 ```
 
 Lastly, note that the value 100 in the document is still stored internally as a String.
-It isn't an Integer because *composition* is a stage before *construction* -- in which
-node would be converted to native data types. But, that also means additional information
-such as the tag would be lost.
+It isn't an Integer because *composition* is a stage before *construction* in which
+the node would be converted to a native data type. But, that also means additional 
+information such as the tag would be lost.
 
 <!--
 
@@ -122,7 +116,7 @@ If you'd like to help this project improve, familiarize yourself with the
 
 ## Contributing
 
-1. Fork it ( https://github.com/[your-github-name]/yaml_node_parser/fork )
+1. Fork it ( https://github.com/trans/yamldom/fork )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
@@ -132,3 +126,4 @@ If you'd like to help this project improve, familiarize yourself with the
 ## Contributors
 
 - [trans](https://github.com/trans) trans - creator, maintainer
+
