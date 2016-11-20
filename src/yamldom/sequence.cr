@@ -9,13 +9,13 @@ class YAML::Sequence < YAML::Collection
                  tag   : String = Tags::SEQ,
                  style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
     @value = value
-    @tag = tag
+    @tag   = tag
     @style = style
   end
 
   def initialize(tag : String, style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
     @value = Array(Node).new
-    @tag = tag
+    @tag   = tag
     @style = style
   end
 
@@ -46,11 +46,26 @@ class YAML::Sequence < YAML::Collection
     @value.size
   end
 
-  # Iteratge over the nodes in the sequence.
+  # Iterate over the node values in the sequence.
   def each
     @value.each do |n|
-      yield n
+      yield n.value
     end
+  end
+
+  def each
+    ValueIterator.new(self)
+  end
+
+  # Iterate over the nodes in the sequence.
+  def each_node
+    @value.each do |n|
+      yield n.value
+    end
+  end
+
+  def each_node
+    NodeIterator.new(self)
   end
 
   # Get a node by its position in the sequence.
@@ -98,5 +113,44 @@ class YAML::Sequence < YAML::Collection
     end
   end
 
+  private class NodeIterator
+    include Iterator(Node)
+    def initialize(@sequence : Sequence)
+      @size  = @seq.size
+      @count = 0
+    end
+    def next
+      if @count < @size
+        @count += 1
+        @sequence.get(@count - 1)
+      else
+        stop
+      end
+    end
+    def rewind
+      @count = 0
+      self
+    end
+  end
+
+  private class ValueIterator
+    include Iterator(String | Array(Node) | Hash(Node,Node))
+    def initialize(@sequence : Sequence)
+      @size  = @seq.size
+      @count = 0
+    end
+    def next
+      if @count < @size
+        @count += 1
+        @sequence[@count - 1]
+      else
+        stop
+      end
+    end
+    def rewind
+      @count = 0
+      self
+    end
+  end
 end
 
