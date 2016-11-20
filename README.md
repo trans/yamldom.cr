@@ -46,14 +46,28 @@ If we look at the elements inside the sequence we will see it is made up
 of other nodes.
 
 ```
-doc.value[0]        #=> "EXAMPLE"
-doc.value[0].class  #=> YAML::Scalar
+doc.value.get(0).to_s   #=> "EXAMPLE"
+doc.value.get(0).class  #=> YAML::Scalar
 ```
 
-Lastly, note that the value 100 in the document is still stored internally as a String.
+We use `#get` to access the node itself. For convenience the usual `#[]` method access
+the underlying value.
+
+```
+doc.value[0]        #=> "EXAMPLE"
+doc.value[0].class  #=> String
+```
+
+This makes it fairly easy to work with the DOM API.
+
+Lastly note that the value 100 in the document is still a String.
+
+```
+doc.value[`]        #=> "100"
+```
+
 It isn't an Integer because *composition* is a stage before *construction* in which
-the node would be converted to a native data type. But, that also means additional 
-information such as the tag would be lost.
+the node would be converted to a native data type (and extra information like tag lost).
 
 <!--
 

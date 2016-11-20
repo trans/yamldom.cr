@@ -52,18 +52,22 @@ class YAML::Scalar < YAML::Node
     {value, canonical_tag}.hash
   end
 
+  # Of course, the size of a scalar is `1`.
   def size
     1
   end
 
+  # Iterate over itself.
   def each
     yield self
   end
 
+  # :nodoc:
   def [](key)
     raise Error.new("no overload matches 'YAML::#{self.class}#[]' with type #{key.class}")
   end
 
+  # :nodoc:
   def []=(key, value)
     raise Error.new("no overload matches 'YAML::#{self.class}#[]=' with type #{key.class}, #{value.class}")
   end
