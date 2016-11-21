@@ -1,5 +1,5 @@
 class YAML::Scalar < YAML::Node
-  include Enumerable(Node)
+  include Enumerable(String)
 
   @value    : String
   @tag      : String = Tags::STR
@@ -17,6 +17,7 @@ class YAML::Scalar < YAML::Node
     @value
   end
 
+  # TODO: Accept any object that support `#to_s`?
   def value=(value : String)
     @value = value
   end
@@ -57,8 +58,13 @@ class YAML::Scalar < YAML::Node
     1
   end
 
-  # Iterate over itself.
+  # Iterate over the value once.
   def each
+    yield value
+  end
+
+  # Iterate over itself once.
+  def each_node
     yield self
   end
 
@@ -81,6 +87,20 @@ class YAML::Scalar < YAML::Node
     @style
   end
 
+  # Adjust the style. Valid values are:
+  #
+  # * LibYAML::ScalarStyle::ANY
+  # * LibYAML::ScalarStyle::PLAIN
+  # * LibYAML::ScalarStyle::SINGLE_QUOTED
+  # * LibYAML::ScalarStyle::DOUBLE_QUOTED
+  # * LibYAML::ScalarStyle::LITERAL
+  # * LibYAML::ScalarStyle::FOLDED
+  #
+  def style=(scalar_style : LibYAML::ScalarStyle)
+    @style = scalar_style
+  end
+
+  # Serialize to YAML format given a YAML::Emitter instance.
   def to_yaml(emitter : YAML::Emitter)
     emitter.scalar(self)
   end
@@ -103,10 +123,4 @@ class YAML::Scalar < YAML::Node
     new(value: value.to_s, tag: tag)
   end
 
-  def self.new(array : Array, tag : String = "tag:yaml.org,2002:seq")
-    value = array.map{ |x| x.is_a?(Node) ? x : new(x) }
-    new(value: value, tag: tag)
-  end
-
-  # TODO: Waht about Hash map?
 end

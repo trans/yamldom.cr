@@ -1,5 +1,5 @@
 class YAML::Sequence < YAML::Collection
-  include Enumerable(Node)
+  include Enumerable(String | Array(Node) | Hash(Node,Node))
 
   @value : Array(Node)
   @tag   : String = Tags::SEQ
@@ -111,6 +111,11 @@ class YAML::Sequence < YAML::Collection
     emitter.sequence(@tag) do
       each &.to_yaml(emitter)
     end
+  end
+
+  def self.new(array : Array, tag : String = "tag:yaml.org,2002:seq")
+    value = array.map{ |x| x.is_a?(Node) ? x : new(x) }
+    new(value: value, tag: tag)
   end
 
   private class NodeIterator

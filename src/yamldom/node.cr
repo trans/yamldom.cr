@@ -32,4 +32,12 @@ abstract class YAML::Node
   def as_map
     self.as(Mapping)
   end
+
+  # TODO: Add other factory methods.
+
+  def self.new(array : Array, tag : String = "tag:yaml.org,2002:seq")
+    Sequence.new(array, tag: tag)
+  end
+
+  # TODO: What about Hash map?
 end
