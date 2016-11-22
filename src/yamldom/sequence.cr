@@ -5,6 +5,14 @@ class YAML::Sequence < YAML::Collection
   @tag   : String = Tags::SEQ
   @style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY
 
+  def self.new(array : Array, tag : String = Tags::SEQ)
+    seq = new(tag: tag)
+    array.each do |x|
+      seq << x #.is_a?(Node) ? x : Node.new(x) }
+    end
+    seq
+  end
+
   def initialize(value : Array(Node),
                  tag   : String = Tags::SEQ,
                  style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
@@ -78,6 +86,11 @@ class YAML::Sequence < YAML::Collection
     @value[index]
   end
 
+  # :nodoc:
+  def node(any)
+    raise Error.new("no overload matches 'YAML::#{self.class}#[]' with type #{any.class}")
+  end
+
   def nodes
     @value
   end
@@ -102,6 +115,11 @@ class YAML::Sequence < YAML::Collection
   end
 
   # Adjust the style. Valid values are:
+  #
+  # * LibYAML::SequenceStyle::ANY
+  # * LibYAML::SequenceStyle::BLOCK
+  # * LibYAML::SequenceStyle::FLOW
+  #
   def style=(scalar_style : LibYAML::SequenceStyle)
     @style = scalar_style
   end
@@ -125,14 +143,6 @@ class YAML::Sequence < YAML::Collection
     emitter.sequence(@tag) do
       each &.to_yaml(emitter)
     end
-  end
-
-  def self.new(array : Array, tag : String = Tags::SEQ)
-    seq = new(tag: tag)
-    array.each do |x|
-      seq << x #.is_a?(Node) ? x : Node.new(x) }
-    end
-    seq
   end
 
   private class NodeIterator

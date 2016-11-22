@@ -35,6 +35,15 @@ abstract class YAML::Node
 
   # TODO: Add other factory methods.
 
+  def self.new(value : String, tag : String = "tag:yaml.org,2002:str")
+    Scalar.new(value: value, tag: tag)
+  end
+
+  # Symbols are converted to strings.
+  def self.new(value : Symbol, tag : String = "tag:yaml.org,2002:str")
+    Scalar.new(value: value.to_s, tag: tag)
+  end
+
   def self.new(value : Nil, tag : String = "tag:yaml.org,2002:null")
     Scalar.new(value: "", tag: tag)
   end

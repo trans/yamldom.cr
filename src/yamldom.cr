@@ -1,6 +1,7 @@
 require "yaml"
 
 require "./yamldom/node"
+require "./yamldom/kind"
 require "./yamldom/scalar"
 require "./yamldom/collection"
 require "./yamldom/sequence"

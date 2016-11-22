@@ -72,6 +72,10 @@ class YAML::Scalar < YAML::Node
     self
   end
 
+  def node(any)
+    raise Error.new("wrong number of arguments for 'YAML::#{self.class}#node' (given 1, expected 0)")
+  end
+
   # :nodoc:
   def [](key)
     raise Error.new("no overload matches 'YAML::#{self.class}#[]' with type #{key.class}")
