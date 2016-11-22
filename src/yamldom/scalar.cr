@@ -68,6 +68,10 @@ class YAML::Scalar < YAML::Node
     yield self
   end
 
+  def node
+    self
+  end
+
   # :nodoc:
   def [](key)
     raise Error.new("no overload matches 'YAML::#{self.class}#[]' with type #{key.class}")

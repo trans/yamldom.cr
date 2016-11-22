@@ -35,6 +35,22 @@ abstract class YAML::Node
 
   # TODO: Add other factory methods.
 
+  def self.new(value : Nil, tag : String = "tag:yaml.org,2002:null")
+    Scalar.new(value: "", tag: tag)
+  end
+
+  def self.new(value : Int, tag : String = "tag:yaml.org,2002:int")
+    Scalar.new(value: value.to_s, tag: tag)
+  end
+
+  def self.new(value : Float, tag : String = "tag:yaml.org,2002:float")
+    Scalar.new(value: value.to_s, tag: tag)
+  end
+
+  def self.new(value : Bool, tag : String = "tag:yaml.org,2002:bool")
+    Scalar.new(value: value.to_s, tag: tag)
+  end
+
   def self.new(array : Array, tag : String = "tag:yaml.org,2002:seq")
     Sequence.new(array, tag: tag)
   end

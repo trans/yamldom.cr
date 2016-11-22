@@ -13,7 +13,7 @@ class YAML::Sequence < YAML::Collection
     @style = style
   end
 
-  def initialize(tag : String, style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
+  def initialize(tag : String = Tags::SEQ, style : LibYAML::SequenceStyle = LibYAML::SequenceStyle::ANY)
     @value = Array(Node).new
     @tag   = tag
     @style = style
@@ -41,6 +41,11 @@ class YAML::Sequence < YAML::Collection
     @value << node
   end
 
+  # Anything else appended to the sequence has to be converted to a node.
+  def <<(object)
+    @value << Node.new(object)
+  end
+
   # Length of the sequence.
   def size
     @value.size
@@ -60,7 +65,7 @@ class YAML::Sequence < YAML::Collection
   # Iterate over the nodes in the sequence.
   def each_node
     @value.each do |n|
-      yield n.value
+      yield n
     end
   end
 
@@ -69,8 +74,12 @@ class YAML::Sequence < YAML::Collection
   end
 
   # Get a node by its position in the sequence.
-  def get(index : Int)
+  def node(index : Int)
     @value[index]
+  end
+
+  def nodes
+    @value
   end
 
   # This does not return the node, but the node's value.
@@ -90,6 +99,11 @@ class YAML::Sequence < YAML::Collection
 
   def []=(index : Int, value)
     @value[index] = Node.new(value)
+  end
+
+  # Adjust the style. Valid values are:
+  def style=(scalar_style : LibYAML::SequenceStyle)
+    @style = scalar_style
   end
 
   # Two sequences are equal if their values and canonical tags are the same.
@@ -113,9 +127,12 @@ class YAML::Sequence < YAML::Collection
     end
   end
 
-  def self.new(array : Array, tag : String = "tag:yaml.org,2002:seq")
-    value = array.map{ |x| x.is_a?(Node) ? x : new(x) }
-    new(value: value, tag: tag)
+  def self.new(array : Array, tag : String = Tags::SEQ)
+    seq = new(tag: tag)
+    array.each do |x|
+      seq << x #.is_a?(Node) ? x : Node.new(x) }
+    end
+    seq
   end
 
   private class NodeIterator

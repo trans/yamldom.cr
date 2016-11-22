@@ -41,13 +41,17 @@ class YAML::Mapping < YAML::Collection
     @value.merge!(other.value)
   end
 
-  # Get the associated node given a matching key node.
-  def get(key : Node)
+  def nodes
+    @value
+  end
+
+  # Get the associated node given a matching node key.
+  def node(key : Node)
     @value[key]
   end
 
   # Get the associated node given a matching key.
-  def get(key)
+  def node(key)
     @value[Node.new(key)]
   end
 

@@ -88,7 +88,6 @@ describe YAML::Scalar do
     end
     it "can map over its value" do
       n = YAML::Scalar.new(2)
-      i = 0; j = 0
       a = n.map{ |x| x }
       a.size.should eq(1)
       a[0].should be_a(String)
