@@ -1,78 +1,49 @@
 require "./spec_helper"
 
 describe YAML::Scalar do
-  describe "string scalar" do
-    it "has correct tag" do
+  describe "#new" do
+    it "creates a string scalar" do
       n = YAML::Scalar.new("HELLO")
       n.tag.should eq("tag:yaml.org,2002:str")
-    end
-    it "has correct value" do
-      n = YAML::Scalar.new("HELLO")
       n.value.should eq("HELLO")
     end
-  end
-  describe "int scalar" do
-    it "has correct tag" do
+    it "creatges int scalar" do
       n = YAML::Scalar.new(100)
       n.tag.should eq("tag:yaml.org,2002:int")
-    end
-    it "has correct value" do
-      n = YAML::Scalar.new(100)
       n.value.should eq("100")
     end
-  end
-  describe "float scalar" do
-    it "has correct tag" do
+    it "creates a float scalar" do
       n = YAML::Scalar.new(4.35)
       n.tag.should eq("tag:yaml.org,2002:float")
-    end
-    it "has correct value" do
-      n = YAML::Scalar.new(4.35)
       n.value.should eq("4.35")
     end
-  end
-  describe "bool scalar" do
-    it "has correct tag when true" do
+    it "crates a true bool scalar" do
       n = YAML::Scalar.new(true)
       n.tag.should eq("tag:yaml.org,2002:bool")
-    end
-    it "has correct tag when false" do
-      n = YAML::Scalar.new(false)
-      n.tag.should eq("tag:yaml.org,2002:bool")
-    end
-    it "has correct value when true" do
-      n = YAML::Scalar.new(true)
       n.value.should eq("true")
     end
-    it "has correct value when false" do
+    it "creates a false bool scalar" do
       n = YAML::Scalar.new(false)
+      n.tag.should eq("tag:yaml.org,2002:bool")
       n.value.should eq("false")
     end
-  end
-  describe "null scalar" do
-    it "has correct tag" do
+    it "creates a null scalar" do
       n = YAML::Scalar.new(nil)
       n.tag.should eq("tag:yaml.org,2002:null")
-    end
-    it "has correct value" do
-      n = YAML::Scalar.new(nil)
       n.value.should eq("")
     end
-  end
-  describe "custom scalar" do
-    it "has correct tag" do
+    it "creates a custom scalar (short tag)" do
       n = YAML::Scalar.new("FOO", "!foo")
       n.tag.should eq("!foo")
+      n.value.should eq("FOO")
+    end
+    it "creates a custom scalar (long tag)" do
       n = YAML::Scalar.new("BAR", "tag:foo.org,2002:bar")
       n.tag.should eq("tag:foo.org,2002:bar")
     end
-    it "has correct value" do
-      n = YAML::Scalar.new("FOO", "!foo")
-      n.value.should eq("FOO")
-    end
   end
 
-  describe "enumerablity" do
+  describe "#each" do
     it "can iterate over its value" do
       n = YAML::Scalar.new(2)
       i = 0; s = ""
@@ -80,12 +51,18 @@ describe YAML::Scalar do
       i.should eq(1)
       s.should eq("2")
     end
+  end
+
+  describe "#each_node" do
     it "can iterate over its node" do
       n = YAML::Scalar.new(2)
       i = 0
       n.each_node{ |n| i += 1; n.should be_a(YAML::Node) }
       i.should eq(1)
     end
+  end
+
+  describe "#map" do
     it "can map over its value" do
       n = YAML::Scalar.new(2)
       a = n.map{ |x| x }
@@ -94,7 +71,7 @@ describe YAML::Scalar do
     end
   end
 
-  describe "equality" do
+  describe "#==" do
     it "is equal to another scalar with same value and tag (1)" do
       a = YAML::Scalar.new("test", "!foo")
       b = YAML::Scalar.new("test", "!foo")
@@ -105,6 +82,9 @@ describe YAML::Scalar do
       b = YAML::Scalar.new(100)
       a.should eq(b)
     end
+  end
+
+  describe "#hash" do
     it "has the same hash if equal" do
       a = YAML::Scalar.new("100", YAML::Tags::INT)
       b = YAML::Scalar.new(100)
@@ -112,18 +92,21 @@ describe YAML::Scalar do
     end
   end
 
-  describe "tag" do
+  describe "#tag" do
     it "can have a blank tag" do
       n = YAML::Scalar.new("test", "")
       n.tag.should eq("")
     end
+  end
+
+  describe "#canoncial_tag" do
     it "will nonethless have the proper canonical tag" do
       n = YAML::Scalar.new("test", "")
       n.canonical_tag.should eq("tag:yaml.org,2002:str")
     end
   end
 
-  describe "value" do
+  describe "#value" do
     it "has a value" do
       n = YAML::Scalar.new("test", "")
       n.value.should eq("test")
@@ -135,7 +118,7 @@ describe YAML::Scalar do
     end
   end
 
-  describe "style" do
+  describe "#style" do
     it "has a style" do
       n = YAML::Scalar.new("test", "")
       n.style.should eq(LibYAML::ScalarStyle::ANY)
