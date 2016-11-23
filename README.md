@@ -1,7 +1,7 @@
 # YAML DOM
 
-**IMPORTANT!!! This project has been shit canned because Crystal can't polymorph
-enumeration over Array and Hash. The makes this kind of API, while already
+**IMPORTANT!!! This project has been shit-canned because Crystal can't polymorph
+enumeration over Array and Hash. That makes this kind of API, while already
 difficult (because Crystal is a strongly typed language), essentially impossible. 
 Sorry kids, you are stuck with pull parsing.**
 
