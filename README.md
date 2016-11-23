@@ -1,5 +1,11 @@
 # YAML DOM
 
+**IMPORTANT!!! This project has been shit canned because Crystal can't polymorph
+enumeration over Array and Hash. The makes this kind of API, while already
+difficult (because Crystal is a strongly typed language), essentially impossible. 
+Sorry kids, you are stuck with pull parsing.**
+
+
 ## Intermediate Representation
 
 [![YAML Process](yamlproc.png)](http://yaml.org/spec/1.2/spec.html#Processing)
@@ -8,11 +14,6 @@ The YAML DOM library provides a YAML composer that the models YAML [Intermediate
 Representation](). This model preserves information lost when using the
 current Crystal "parser". In particular `tag` information is preserved
 and accessible.
-
-**IMPORTANT!!! This project has been shit canned because Crystal can't polymorph
-enumeration over Array and Hash. The makes this kind of API, while already
-difficult (because Crystal is a strongly typed language), essentially impossible. 
-Sorry kids, you are stuck with pull parsing.**
 
 
 ## Installation
