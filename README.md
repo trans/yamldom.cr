@@ -9,6 +9,11 @@ Representation](). This model preserves information lost when using the
 current Crystal "parser". In particular `tag` information is preserved
 and accessible.
 
+**IMPORTANT!!! This project has been shit canned because Crystal can't polymorph
+enumeration over Array and Hash. The makes this kind of API, while already
+difficult (because Crystal is a strongly typed language), essentially impossible. 
+Sorry kids, you are stuck with pull parsing.**
+
 
 ## Installation
 
@@ -46,11 +51,11 @@ If we look at the elements inside the sequence we will see it is made up
 of other nodes.
 
 ```
-doc.value.get(0).to_s   #=> "EXAMPLE"
-doc.value.get(0).class  #=> YAML::Scalar
+doc.value.node(0).to_s   #=> "EXAMPLE"
+doc.value.node(0).class  #=> YAML::Scalar
 ```
 
-We use `#get` to access the node itself. For convenience the usual `#[]` method access
+We use `#node` to access the node itself. For convenience the usual `#[]` method accesses
 the underlying value.
 
 ```
@@ -63,7 +68,7 @@ This makes it fairly easy to work with the DOM API.
 Lastly note that the value 100 in the document is still a String.
 
 ```
-doc.value[`]        #=> "100"
+doc.value[0]        #=> "100"
 ```
 
 It isn't an Integer because *composition* is a stage before *construction* in which

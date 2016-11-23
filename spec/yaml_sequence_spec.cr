@@ -82,7 +82,7 @@ describe YAML::Sequence do
     end
   end
 
-  describe "#canonical_each" do
+  describe "#canonical_tag" do
     it "will nonethless have the proper canonical tag" do
       n = YAML::Sequence.new([1,2,3], "")
       n.canonical_tag.should eq("tag:yaml.org,2002:seq")

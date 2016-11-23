@@ -66,6 +66,13 @@ class YAML::Sequence < YAML::Collection
     end
   end
 
+  # Iterate over the node values in the sequence.
+  def each
+    @value.each do |n|
+      yield n.value, nil
+    end
+  end
+
   def each
     ValueIterator.new(self)
   end

@@ -63,6 +63,11 @@ class YAML::Scalar < YAML::Node
     yield value
   end
 
+  # Iterate over the value once.
+  def each
+    yield value, nil
+  end
+
   # Iterate over itself once.
   def each_node
     yield self
